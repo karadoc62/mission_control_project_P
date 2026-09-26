@@ -65,3 +65,13 @@ class Station:
             conso_globale += member.consommation_o2
         
         return conso_globale
+
+
+    def calculer_autonomie_oxygene(self) -> int:
+        o2_disponible: int = self.get_ressource("Oxygen").quantite_disponible
+        o2_consomme: int = self.calculer_consommation_oxygene_equipage()
+        
+        if o2_consomme == 0:
+            raise ValueError("Impossible de calculer l'autonomie d'oxygene san smembre d'équipage")
+        
+        return o2_disponible // o2_consomme
