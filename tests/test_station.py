@@ -1,5 +1,6 @@
 import pytest
 
+from src.crew_member import CrewMember
 from src.resource import Resource
 from src.station import Station
 
@@ -9,6 +10,7 @@ def test_creation_station():
     assert isinstance(station_test, Station)
     assert station_test.name == "mir"
     assert station_test.resources == {}
+    assert station_test.members == {}
 
 
 @pytest.mark.parametrize(
@@ -27,19 +29,19 @@ def test_station_reject_invalid_name_type(invalid_name):
 
 
 @pytest.mark.parametrize(
-    "invaliid_name",
+    "invalid_name",
     [
         "",
         "  ",
     ]
 )
-def test_station_reject_invalid_name_value(invaliid_name):
+def test_station_reject_invalid_name_value(invalid_name):
     with pytest.raises(ValueError):
-        Station(invaliid_name)
+        Station(invalid_name)
 
 
 def test_station_ajouter_ressource():
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     oxygen : Resource = Resource("Oxygen", 1000)
     
     station_test.ajouter_ressource(resource=oxygen)
@@ -59,13 +61,13 @@ def test_station_ajouter_ressource():
     ]
 )
 def test_station_ajouter_ressource_reject_invalid_ressource(invalid_resource):
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     with pytest.raises(TypeError):
         station_test.ajouter_ressource(invalid_resource)
 
 
 def test_station_ajouter_ressource_already_exist():
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     oxygen : Resource = Resource("Oxygen", 1000)
     
     station_test.ajouter_ressource(oxygen)
@@ -75,7 +77,7 @@ def test_station_ajouter_ressource_already_exist():
 
 
 def test_station_get_ressource():
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     oxygen : Resource = Resource("Oxygen", 1000)
     station_test.ajouter_ressource(oxygen)
     
@@ -98,7 +100,7 @@ def test_station_get_ressource():
     ]
 )
 def test_station_get_ressource_reject_invalid_name_type(invalid_name):
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     with pytest.raises(TypeError):
         station_test.get_ressource(invalid_name)
 
@@ -111,17 +113,128 @@ def test_station_get_ressource_reject_invalid_name_type(invalid_name):
     ]
 )
 def test_station_get_ressource_reject_invalid_name_value(invalid_name):
-    station_test : Station = Station("mir")
+    station_test: Station = Station("mir")
     with pytest.raises(ValueError):
         station_test.get_ressource(invalid_name)
 
 
 def test_station_get_ressource_reject_not_exist_ressource():
-    station_test : Station = Station("mir")
-    resource_test : Resource = Resource("test", 1000)
+    station_test: Station = Station("mir")
+    resource_test: Resource = Resource("test", 1000)
     resource_test_2 : Resource = Resource("test_2", 1000)
     
     station_test.ajouter_ressource(resource_test)
     
     with pytest.raises(KeyError):
         station_test.get_ressource(resource_test_2.nom)
+
+
+def test_station_ajouter_membre():
+    station_test: Station = Station("mir")
+    member_test: CrewMember = CrewMember("Alice", "Commandant", 20)
+    station_test.ajouter_membre(member=member_test)
+    
+    assert len(station_test.members) == 1
+    assert station_test.members["Alice"] is member_test
+
+
+@pytest.mark.parametrize(
+    "invalid_member",
+    [
+        123,
+        1.20,
+        True,
+        (1, 2),
+        {},
+        "test",
+        None,
+    ]
+)
+def test_station_ajouter_membre_reject_invalid_type(invalid_member):
+    station_test: Station = Station("mir")
+    with pytest.raises(TypeError):
+        station_test.ajouter_membre(invalid_member)
+    assert not station_test.members
+
+
+def test_station_ajouter_membre_reject_member_exist():
+    station_test: Station = Station("mir")
+    member_test: CrewMember = CrewMember("Alice", "Commandant", 20)
+    station_test.ajouter_membre(member=member_test)
+    with pytest.raises(ValueError):
+        station_test.ajouter_membre(member=member_test)
+    assert len(station_test.members) == 1
+    
+
+def test_station_get_membre():
+    station_test: Station = Station("mir")
+    member_test: CrewMember = CrewMember("Alice", "Commandant", 20)
+    station_test.ajouter_membre(member=member_test)
+    
+    member_searched = station_test.get_membre("Alice")
+    assert member_searched is member_test
+    
+
+@pytest.mark.parametrize(
+    "invalid_member",
+    [
+        123,
+        1.20,
+        True,
+        (1, 2),
+        {},
+        None,
+    ]
+)
+def test_station_get_membre_invalid_type(invalid_member):
+    station_test: Station = Station("mir")
+    with pytest.raises(TypeError):       
+        station_test.get_membre(invalid_member)
+        
+
+@pytest.mark.parametrize(
+    "invalid_member",
+    [
+        "",
+        "   ",
+    ]
+)
+def test_station_get_membre_invalid_value(invalid_member):
+    station_test: Station = Station("mir")
+    with pytest.raises(ValueError):       
+        station_test.get_membre(invalid_member)
+
+
+def test_station_get_membre_reject_inexist_member():
+    station_test: Station = Station("mir")
+    member_test_1: CrewMember = CrewMember("Alice", "Commandant", 20)
+    member_test_2: CrewMember = CrewMember("Paul", "Sous-fifre", 40)
+    station_test.ajouter_membre(member=member_test_1)
+    with pytest.raises(KeyError):
+        station_test.get_membre(member_test_2.nom)
+
+
+def test_station_calculer_consommation_oxygene_equipage():
+    station_test: Station = Station("mir")
+    member_test_1: CrewMember = CrewMember("Alice", "Commandant", 20)
+    member_test_2: CrewMember = CrewMember("Paul", "Sous-fifre", 40)
+    member_test_3: CrewMember = CrewMember("Claire", "Officier", 40)
+    station_test.ajouter_membre(member=member_test_1)
+    station_test.ajouter_membre(member=member_test_2)
+    station_test.ajouter_membre(member=member_test_3)
+    
+    conso_totale: int = station_test.calculer_consommation_oxygene_equipage()
+    
+    assert conso_totale == 100
+    assert type(conso_totale) is int
+
+
+def test_station_calculer_consommation_oxygene_equipage_zero_membre():
+    station_test: Station = Station("mir")
+    
+    conso_totale: int = station_test.calculer_consommation_oxygene_equipage()
+    
+    assert conso_totale == 0
+    assert type(conso_totale) is int
+
+
