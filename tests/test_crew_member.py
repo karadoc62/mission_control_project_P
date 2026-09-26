@@ -1,6 +1,6 @@
 import pytest
 
-from src.crew_member import CrewMember
+from src.mission_control.crew_member import CrewMember
 
 
 def test_create_member():

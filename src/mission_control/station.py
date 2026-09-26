@@ -1,5 +1,5 @@
-from src.resource import Resource
-from src.crew_member import CrewMember
+from .resource import Resource
+from .crew_member import CrewMember
 
 class Station:
     

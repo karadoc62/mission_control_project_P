@@ -1,6 +1,6 @@
 import pytest
 
-from src.resource import Resource
+from src.mission_control.resource import Resource
 
 def test_creation_resource():
     oxygen = Resource("Oxygène", 1000)
