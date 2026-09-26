@@ -61,4 +61,9 @@ class Resource:
         self.quantite_disponible += value
         
     
+    def __repr__(self):
+        return f"Resource(nom={self.nom!r}, quantite_disponible={self.quantite_disponible!r})"
+
     
+    def __str__(self):
+        return f"{self.nom} : {self.quantite_disponible} unités disponibles."

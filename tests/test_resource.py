@@ -103,3 +103,13 @@ def test_subtract_amount_bad_value(value):
     assert oxygen.quantite_disponible == 1000
 
 
+def test_resource_repr():
+    oxygen: Resource = Resource("Oxygen", 1000)
+    
+    assert repr(oxygen) == "Resource(nom='Oxygen', quantite_disponible=1000)"
+
+
+def test_resource_str():
+    oxygen: Resource = Resource("Oxygen", 1000)
+    
+    assert str(oxygen) == "Oxygen : 1000 unités disponibles."
