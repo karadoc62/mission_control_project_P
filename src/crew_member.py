@@ -19,3 +19,12 @@ class CrewMember:
         self.nom = nom
         self.role = role
         self.consommation_o2 = consommation_o2
+
+    
+    def __repr__(self):
+        return f"CrewMember(nom={self.nom!r}, role={self.role!r}, consommation_o2={self.consommation_o2!r})"
+    
+    
+    def __str__(self):
+        return f"{self.nom} - {self.role} - {self.consommation_o2} unités O2/jour"
+    

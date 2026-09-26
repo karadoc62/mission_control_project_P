@@ -61,3 +61,15 @@ def test_crewmember_reject_invalid_type(name, role, conso):
 def test_crewmember_reject_invalid_value(name, role, conso):
     with pytest.raises(ValueError):
         CrewMember(nom=name, role=role, consommation_o2=conso)
+
+
+def test_crewmember_repr():
+    member_test: CrewMember = CrewMember("Alice", "Commandant", 20)
+    
+    assert repr(member_test) == "CrewMember(nom='Alice', role='Commandant', consommation_o2=20)"
+
+
+def test_crewmember_str():
+    member_test: CrewMember = CrewMember("Alice", "Commandant", 20)
+    
+    assert str(member_test) == "Alice - Commandant - 20 unités O2/jour"
