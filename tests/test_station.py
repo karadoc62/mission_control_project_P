@@ -238,3 +238,55 @@ def test_station_calculer_consommation_oxygene_equipage_zero_membre():
     assert type(conso_totale) is int
 
 
+def test_station_calculer_autonomie_oxygene():
+    station_test: Station = Station("mir")
+    oxygen: Resource = Resource("Oxygen", 1010)
+    member_test_1: CrewMember = CrewMember("Alice", "Commandant", 20)
+    member_test_2: CrewMember = CrewMember("Paul", "Sous-fifre", 40)
+    member_test_3: CrewMember = CrewMember("Claire", "Officier", 40)
+    station_test.ajouter_ressource(oxygen)
+    station_test.ajouter_membre(member=member_test_1)
+    station_test.ajouter_membre(member=member_test_2)
+    station_test.ajouter_membre(member=member_test_3)
+
+    jours_restants: int = station_test.calculer_autonomie_oxygene()
+    assert jours_restants == 10
+
+
+def test_station_calculer_autonomie_oxygene_with_not_exist_resource():
+    station_test: Station = Station("mir")
+    member_test_1: CrewMember = CrewMember("Alice", "Commandant", 20)
+    member_test_2: CrewMember = CrewMember("Paul", "Sous-fifre", 40)
+    member_test_3: CrewMember = CrewMember("Claire", "Officier", 40)
+    station_test.ajouter_membre(member=member_test_1)
+    station_test.ajouter_membre(member=member_test_2)
+    station_test.ajouter_membre(member=member_test_3)
+
+    with pytest.raises(KeyError):
+        station_test.calculer_autonomie_oxygene()
+
+
+def test_station_calculer_autonomie_oxygene_with_zero_member():
+    station_test: Station = Station("mir")
+    oxygen: Resource = Resource("Oxygen", 1010)
+    
+    station_test.ajouter_ressource(oxygen)
+    
+    with pytest.raises(ValueError):
+        station_test.calculer_autonomie_oxygene()
+
+
+def test_station_calculer_autonomie_oxygene_with_zero_quantite_dispo():
+    station_test: Station = Station("mir")
+    oxygen: Resource = Resource("Oxygen", 0)
+    member_test_1: CrewMember = CrewMember("Alice", "Commandant", 20)
+    member_test_2: CrewMember = CrewMember("Paul", "Sous-fifre", 40)
+    member_test_3: CrewMember = CrewMember("Claire", "Officier", 40)
+    station_test.ajouter_ressource(oxygen)
+    station_test.ajouter_membre(member=member_test_1)
+    station_test.ajouter_membre(member=member_test_2)
+    station_test.ajouter_membre(member=member_test_3)
+
+    jours_restants: int = station_test.calculer_autonomie_oxygene()
+    assert jours_restants == 0
+
