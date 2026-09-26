@@ -1,8 +1,8 @@
 import pytest
 
-from src.crew_member import CrewMember
-from src.resource import Resource
-from src.station import Station
+from src.mission_control.crew_member import CrewMember
+from src.mission_control.resource import Resource
+from src.mission_control.station import Station
 
 def test_creation_station():
     station_test: Station = Station("mir")

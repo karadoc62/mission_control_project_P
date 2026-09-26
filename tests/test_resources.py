@@ -1,5 +1,5 @@
 import pytest
-from src.resources import calculer_autonomie
+from src.mission_control.resources import calculer_autonomie
 
 def test_calculer_autonomie_avec_reste():
     result = calculer_autonomie(1000, 5, 30) # 1000 // (5 * 30)
