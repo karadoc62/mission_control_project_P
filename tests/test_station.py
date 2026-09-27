@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from src.mission_control.crew_member import CrewMember
@@ -290,3 +291,233 @@ def test_station_calculer_autonomie_oxygene_with_zero_quantite_dispo():
     jours_restants: int = station_test.calculer_autonomie_oxygene()
     assert jours_restants == 0
 
+
+def test_station_to_dict():
+    station_mir: Station = Station("Mir")
+        
+    oxygen: Resource = Resource("Oxygène", 1000)
+    water: Resource = Resource("Eau", 5000)
+    
+    alice: CrewMember = CrewMember("Alice", "Commandant", 30)
+    paul: CrewMember = CrewMember("Paul", "Commandant en second", 30)
+
+
+    station_mir.ajouter_ressource(oxygen)
+    station_mir.ajouter_ressource(water)
+    
+    station_mir.ajouter_membre(alice)
+    station_mir.ajouter_membre(paul)
+    
+    station_data: dict = station_mir.to_dict()
+
+    assert isinstance(station_data, dict)
+    assert station_data["name"] == "Mir"
+    assert isinstance(station_data["ressources"], list)
+    assert isinstance(station_data["members"], list)
+    
+    assert station_data["ressources"][0] == {
+            "nom": "Oxygène",
+            "quantite_disponible": 1000
+        }
+    assert station_data["ressources"][1] == {
+            "nom": "Eau",
+            "quantite_disponible": 5000
+        }
+    
+    assert station_data["members"][0] == {
+            "nom": "Alice",
+            "role": "Commandant",
+            "consommation_o2": 30
+        }
+    assert station_data["members"][1] == {
+            "nom": "Paul",
+            "role": "Commandant en second",
+            "consommation_o2": 30
+        }
+    
+
+def test_station_to_dict_empty():
+    station_test: Station = Station("Mir")
+    
+    station_data: dict = station_test.to_dict()
+    
+    assert isinstance(station_data, dict)
+    assert station_data["name"] == "Mir"
+    assert station_data["ressources"] == []
+    assert station_data["members"] == []
+    
+
+def test_station_sauvegarder(tmp_path):
+    station_mir: Station = Station("Mir")
+            
+    oxygen: Resource = Resource("Oxygène", 1000)
+    
+    alice: CrewMember = CrewMember("Alice", "Commandant", 30)
+
+    station_mir.ajouter_ressource(oxygen)
+    station_mir.ajouter_membre(alice)
+    
+    fichier = tmp_path / "station_test.json"
+    
+    station_mir.sauvegarder(str(fichier))
+    
+    assert fichier.exists()
+    
+    with open(str(fichier), "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+        assert data["name"] == "Mir"
+        assert isinstance(data["ressources"], list)
+        assert isinstance(data["members"], list)
+        assert data["ressources"]
+        assert data["members"]
+    
+
+@pytest.mark.parametrize(
+    "invalid_path",
+    [
+        123,
+        1.20,
+        True,
+        (1, 2),
+        {},
+        None,
+    ]
+)
+def test_station_sauvegarder_reject_invalid_type(invalid_path):
+    station_mir: Station = Station("Mir")
+    
+    with pytest.raises(TypeError):
+        station_mir.sauvegarder(invalid_path)
+
+
+@pytest.mark.parametrize(
+    "invalid_path",
+    [
+        "",
+        "   ",
+    ]
+)
+def test_station_sauvegarder_reject_invalid_value(invalid_path):
+    station_mir: Station = Station("Mir")
+                
+    with pytest.raises(ValueError):
+        station_mir.sauvegarder(invalid_path)
+
+
+def test_station_charger(tmp_path):
+    
+    fichier = tmp_path / "station_test.json"
+    
+    # contenu du fichier json qui sera chargé
+    data_to_save: dict = {
+        "name": "Mir",
+        "ressources": [
+            {
+                "nom": "Oxygène",
+                "quantite_disponible": 1000
+            }
+        ],
+        "members": [
+            {
+                "nom": "Alice",
+                "role": "Commandant",
+                "consommation_o2": 30
+            },
+            {
+                "nom": "Paul",
+                "role": "Commandant en second",
+                "consommation_o2": 30
+            }
+        ]
+    }
+    
+    # Création du fichier json
+    with open(fichier, "w", encoding="utf-8") as file:
+        json.dump(
+            data_to_save,
+            file,
+            indent=4,
+            ensure_ascii=False,
+        )
+    
+    station_loaded: Station = Station.charger(str(fichier))
+    
+    assert isinstance(station_loaded, Station)
+    assert station_loaded.name == "Mir"
+    
+    for res in station_loaded.resources.values():
+        assert isinstance(res, Resource)
+
+    assert station_loaded.resources["Oxygène"].nom == "Oxygène"
+    assert station_loaded.resources["Oxygène"].quantite_disponible == 1000
+        
+    for mem in station_loaded.members.values():
+        assert isinstance(mem, CrewMember)
+    
+    assert station_loaded.members["Alice"].nom == "Alice"
+    assert station_loaded.members["Alice"].role == "Commandant"
+    assert station_loaded.members["Alice"].consommation_o2 == 30
+    
+    assert station_loaded.members["Paul"].nom == "Paul"
+    assert station_loaded.members["Paul"].role == "Commandant en second"
+    assert station_loaded.members["Paul"].consommation_o2 == 30
+
+
+@pytest.mark.parametrize(
+    "invalid_path",
+    [
+        123,
+        1.20,
+        True,
+        (1, 2),
+        {},
+        None,
+    ]
+)
+def test_station_charger_invalid_type(invalid_path):
+    
+    with pytest.raises(TypeError):
+        Station.charger(invalid_path)
+
+
+@pytest.mark.parametrize(
+    "invalid_path",
+    [
+        "",
+        "   ",
+    ]
+)
+def test_station_charger_invalid_value(invalid_path):
+    
+    with pytest.raises(ValueError):
+        Station.charger(invalid_path)
+
+
+def test_station_save_and_load_round_trip(tmp_path):
+    station_mir: Station = Station("Mir")
+                
+    oxygen: Resource = Resource("Oxygène", 1000)
+    
+    alice: CrewMember = CrewMember("Alice", "Commandant", 30)
+
+    station_mir.ajouter_ressource(oxygen)
+    station_mir.ajouter_membre(alice)
+    
+    fichier = tmp_path / "station_test.json"
+    
+    station_mir.sauvegarder(str(fichier))
+    
+    station_loaded: Station = Station.charger(str(fichier))
+    
+    assert station_mir.name == station_loaded.name
+    assert station_mir.resources["Oxygène"].nom == station_loaded.resources["Oxygène"].nom
+    assert station_mir.resources["Oxygène"].quantite_disponible == station_loaded.resources["Oxygène"].quantite_disponible
+    assert station_mir.members["Alice"].nom == station_loaded.members["Alice"].nom
+    assert station_mir.members["Alice"].role == station_loaded.members["Alice"].role
+    assert station_mir.members["Alice"].consommation_o2 == station_loaded.members["Alice"].consommation_o2
+    
+    assert station_loaded is not station_mir
+    assert station_loaded.resources["Oxygène"] is not oxygen
+    assert station_loaded.members["Alice"] is not alice
+    
