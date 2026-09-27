@@ -123,6 +123,7 @@ class Station:
                 ensure_ascii=False,
                 )
     
+    
     @classmethod
     def charger(cls, path: str) -> Station:
         if not isinstance(path, str):
