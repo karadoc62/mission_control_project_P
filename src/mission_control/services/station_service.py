@@ -1,4 +1,4 @@
-from mission_control.station import Station
+from src.mission_control.station import Station
 
 class StationService:
     
